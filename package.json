@@ -10,6 +10,10 @@
     "seed": "node final/util/seed/index.js",
     "lint": "eslint \"src/**/*.js\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Hamzaahmed95/notes_api_graphql.git"
+  },
   "nodemonConfig": {
     "ignore": [
       "**.test.js"
