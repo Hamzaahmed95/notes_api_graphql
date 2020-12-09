@@ -1,14 +1,14 @@
 module.exports = {
-  questions: async (parent, args, { models }) => {
+  getAllQuestions: async (parent, args, { models }) => {
       return await models.Question.find();
     },
-    question: async (parent, args, { models }) => {
+    getQuestion: async (parent, args, { models }) => {
       return await models.Question.findById(args.id);
     },
-    user: async (parent, args, { models }) => {
+    getUser: async (parent, args, { models }) => {
       return await models.User.findOne({ username: args.username });
     },
-    users: async (parent, args, { models }) => {
+    getAllUsers: async (parent, args, { models }) => {
       return await models.User.find({}).limit(100);
     },
     me: async (parent, args, { models, user }) => {
@@ -50,11 +50,17 @@ module.exports = {
         hasNextPage
       };
     },
-    answers: async (parent,args, { models}) =>{
+    getAllAnswers: async (parent,args, { models}) =>{
       return await models.Answer.find();
     },
-    answer: async (parent, args,{models}) =>{
+    getAnswer: async (parent, args,{models}) =>{
       return await models.Answer.findById(args.id);
+    },
+    getAllQuizes: async (parent,args, { models}) =>{
+      return await models.Quiz.find();
+    },
+    getQuiz: async (parent, args,{models}) =>{
+      return await models.Quiz.findById(args.id);
     }
   };
   

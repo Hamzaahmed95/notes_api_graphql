@@ -4,39 +4,21 @@ const mongoose = require('mongoose');
 // Define the Question's database schema
 const questionSchema = new mongoose.Schema(
   {
-    name: {
+    description: {
       type: String,
       required: true,
     },
-   
-    description: {
-        type: String,
-        required: true,
-    },
-    time: {
-        type: String,
-        required: true,
-    },
-    category: {
-        type: String,
-        required: true,
+    quiz: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Quiz',
+      required: true
     },
     // reference the author's object ID
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
-    },
-    favoriteCount: {
-      type: Number,
-      default: 0
-    },
-    favoritedBy: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }
-    ]
+    }
   },
   {
     // Assigns createdAt and updatedAt fields with a Date type

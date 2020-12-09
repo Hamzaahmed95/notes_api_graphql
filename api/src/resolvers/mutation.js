@@ -12,18 +12,37 @@ require('dotenv').config();
 const gravatar = require('../util/gravatar');
 
 module.exports = {
-  newQuestion: async (parent, args, { models, user }) => {
+  createQuestion: async (parent, args, { models, user }) => {
     if (!user) {
       throw new AuthenticationError('You must be signed in to create a Question');
     }
 
     return await models.Question.create({
-      name: args.name,
+      description: args.description,
+      quiz: mongoose.Types.ObjectId(args.quizID),
+      author: mongoose.Types.ObjectId(user.id)
+    });
+  },
+  createQuiz: async (parent, args, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError('You must be signed in to create a Question');
+    }
+
+    return await models.Quiz.create({
       description: args.description,
       time: args.time,
-      category:args.category,
-      author: mongoose.Types.ObjectId(user.id),
-      favoriteCount: 0
+      category: args.category,
+      author: mongoose.Types.ObjectId(user.id)
+    });
+  },
+  createAnswer: async (parent,args,{ models, user }) => {
+    if(!user){
+      throw new AuthenticationError('You must be signed in to create an answer');
+    }
+    return await models.Answer.create({
+      description: args.description,
+      question: mongoose.Types.ObjectId(args.questionID),
+      isTrue: args.isTrue
     });
   },
   deleteQuestion: async (parent, { id }, { models, user }) => {
@@ -48,7 +67,51 @@ module.exports = {
       return false;
     }
   },
-  updateQuestion: async (parent, { name,description, time,category, id }, { models, user }) => {
+  deleteQuiz: async (parent, { id }, { models, user }) => {
+    // if not a user, throw an Authentication Error
+    if (!user) {
+      throw new AuthenticationError('You must be signed in to delete a Question');
+    }
+
+    // find the question
+    const quiz = await models.Quiz.findById(id);
+    // if the question owner and current user don't match, throw a forbidden error
+    if (quiz && String(quiz.author) !== user.id) {
+      throw new ForbiddenError("You don't have permissions to delete the Question");
+    }
+
+    try {
+      // if everything checks out, remove the question
+      await quiz.remove();
+      return true;
+    } catch (err) {
+      // if there's an error along the way, return false
+      return false;
+    }
+  },
+  deleteAnswer: async (parent, { id }, { models, user }) => {
+    // if not a user, throw an Authentication Error
+    if (!user) {
+      throw new AuthenticationError('You must be signed in to delete an Answer');
+    }
+
+    // find the answer
+    const answer = await models.Answer.findById(id);
+    // if the answer owner and current user don't match, throw a forbidden error
+    if (answer && String(answer.author) !== user.id) {
+      throw new ForbiddenError("You don't have permissions to delete the Answer");
+    }
+
+    try {
+      // if everything checks out, remove the answer
+      await answer.remove();
+      return true;
+    } catch (err) {
+      // if there's an error along the way, return false
+      return false;
+    }
+  },
+  updateQuestion: async (parent, { description, id }, { models, user }) => {
     // if not a user, throw an Authentication Error
     if (!user) {
       throw new AuthenticationError('You must be signed in to update a question');
@@ -68,7 +131,34 @@ module.exports = {
       },
       {
         $set: {
-          name,
+          description
+        }
+      },
+      {
+        new: true
+      }
+    );
+  },
+  updateQuiz: async (parent, { description,time,category, id }, { models, user }) => {
+    // if not a user, throw an Authentication Error
+    if (!user) {
+      throw new AuthenticationError('You must be signed in to update a question');
+    }
+
+    // find the question
+    const question = await models.Question.findById(id);
+    // if the question owner and current user don't match, throw a forbidden error
+    if (question && String(question.author) !== user.id) {
+      throw new ForbiddenError("You don't have permissions to update the question");
+    }
+
+    // Update the question in the db and return the updated question
+    return await models.Quiz.findOneAndUpdate(
+      {
+        _id: id
+      },
+      {
+        $set: {
           description,
           time,
           category
@@ -79,52 +169,34 @@ module.exports = {
       }
     );
   },
-  toggleFavorite: async (parent, { id }, { models, user }) => {
-    // if no user context is passed, throw auth error
+  updateAnswer: async (parent, args, { models, user }) => {
+    // if not a user, throw an Authentication Error
     if (!user) {
-      throw new AuthenticationError();
+      throw new AuthenticationError('You must be signed in to update an answer');
     }
 
-    // check to see if the user has already favorited the question
-    let questionCheck = await models.Question.findById(id);
-    const hasUser = questionCheck.favoritedBy.indexOf(user.id);
-
-    // if the user exists in the list
-    // pull them from the list and reduce the favoriteCount by 1
-    if (hasUser >= 0) {
-      return await models.Question.findByIdAndUpdate(
-        id,
-        {
-          $pull: {
-            favoritedBy: mongoose.Types.ObjectId(user.id)
-          },
-          $inc: {
-            favoriteCount: -1
-          }
-        },
-        {
-          // Set new to true to return the updated doc
-          new: true
-        }
-      );
-    } else {
-      // if the user doesn't exists in the list
-      // add them to the list and increment the favoriteCount by 1
-      return await models.Question.findByIdAndUpdate(
-        id,
-        {
-          $push: {
-            favoritedBy: mongoose.Types.ObjectId(user.id)
-          },
-          $inc: {
-            favoriteCount: 1
-          }
-        },
-        {
-          new: true
-        }
-      );
+    // find the answer
+    const answer = await models.Answer.findById(id);
+    // if the answer owner and current user don't match, throw a forbidden error
+    if (answer && String(answer.author) !== user.id) {
+      throw new ForbiddenError("You don't have permissions to update the answer");
     }
+
+    // Update the answer in the db and return the updated answer
+    return await models.Answer.findOneAndUpdate(
+      {
+        _id: args.id
+      },
+      {
+        $set: {
+          description,
+          isTrue: args.isTrue
+        }
+      },
+      {
+        new: true
+      }
+    );
   },
   signUp: async (parent, { username, email, password }, { models }) => {
     // normalize email address
@@ -148,7 +220,6 @@ module.exports = {
       throw new Error('Error creating account'+err);
     }
   },
-
   signIn: async (parent, { username, email, password }, { models }) => {
     if (email) {
       // normalize email address
@@ -172,15 +243,5 @@ module.exports = {
 
     // create and return the json web token
     return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-  },
-  newAnswer: async (parent,args,{ models, user }) => {
-    if(!user){
-      throw new AuthenticationError('You must be signed in to create an answer');
-    }
-    return await models.Answer.create({
-      content: args.content,
-      question: mongoose.Types.ObjectId(args.questionID),
-      isTrue: args.isTrue
-    });
   }
 };
