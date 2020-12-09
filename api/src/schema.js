@@ -10,10 +10,17 @@ module.exports = gql`
     time: String!
     category: String
     author: User!
+    answer: [Answer!]!
     createdAt: DateTime!
     updatedAt: DateTime!
     favoriteCount: Int!
     favoritedBy: [User]
+  }
+  type Answer{
+    id: ID!
+    content: String!
+    question: Note!
+    isTrue: Boolean!
   }
 
   type User {
@@ -38,6 +45,8 @@ module.exports = gql`
     users: [User!]!
     me: User!
     noteFeed(cursor: String): NoteFeed
+    answers: [Answer!]!
+    answer(id: ID): Answer!
   }
 
   type Mutation {
@@ -47,5 +56,6 @@ module.exports = gql`
     toggleFavorite(id: ID!): Note!
     signUp(username: String!, email: String!, password: String!): String!
     signIn(username: String, email: String, password: String!): String!
+    newAnswer(content: String!,questionID: String!,isTrue: Boolean!): Answer
   }
 `;

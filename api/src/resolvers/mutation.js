@@ -172,5 +172,15 @@ module.exports = {
 
     // create and return the json web token
     return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+  },
+  newAnswer: async (parent,args,{ models, user }) => {
+    if(!user){
+      throw new AuthenticationError('You must be signed in to create an answer');
+    }
+    return await models.Answer.create({
+      content: args.content,
+      question: mongoose.Types.ObjectId(args.questionID),
+      isTrue: args.isTrue
+    });
   }
 };

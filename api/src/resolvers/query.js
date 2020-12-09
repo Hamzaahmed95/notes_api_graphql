@@ -1,6 +1,6 @@
 module.exports = {
     notes: async (parent, args, { models }) => {
-      return await models.Note.find().limit();
+      return await models.Note.find();
     },
     note: async (parent, args, { models }) => {
       return await models.Note.findById(args.id);
@@ -49,6 +49,12 @@ module.exports = {
         cursor: newCursor,
         hasNextPage
       };
+    },
+    answers: async (parent,args, { models}) =>{
+      return await models.Answer.find();
+    },
+    answer: async (parent, args,{models}) =>{
+      return await models.Answer.findById(args.id);
     }
   };
   
