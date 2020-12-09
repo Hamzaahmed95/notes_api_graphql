@@ -12,12 +12,12 @@ require('dotenv').config();
 const gravatar = require('../util/gravatar');
 
 module.exports = {
-  newNote: async (parent, args, { models, user }) => {
+  newQuestion: async (parent, args, { models, user }) => {
     if (!user) {
-      throw new AuthenticationError('You must be signed in to create a note');
+      throw new AuthenticationError('You must be signed in to create a Question');
     }
 
-    return await models.Note.create({
+    return await models.Question.create({
       name: args.name,
       description: args.description,
       time: args.time,
@@ -26,43 +26,43 @@ module.exports = {
       favoriteCount: 0
     });
   },
-  deleteNote: async (parent, { id }, { models, user }) => {
+  deleteQuestion: async (parent, { id }, { models, user }) => {
     // if not a user, throw an Authentication Error
     if (!user) {
-      throw new AuthenticationError('You must be signed in to delete a note');
+      throw new AuthenticationError('You must be signed in to delete a Question');
     }
 
-    // find the note
-    const note = await models.Note.findById(id);
-    // if the note owner and current user don't match, throw a forbidden error
-    if (note && String(note.author) !== user.id) {
-      throw new ForbiddenError("You don't have permissions to delete the note");
+    // find the question
+    const question = await models.Question.findById(id);
+    // if the question owner and current user don't match, throw a forbidden error
+    if (question && String(question.author) !== user.id) {
+      throw new ForbiddenError("You don't have permissions to delete the Question");
     }
 
     try {
-      // if everything checks out, remove the note
-      await note.remove();
+      // if everything checks out, remove the question
+      await question.remove();
       return true;
     } catch (err) {
       // if there's an error along the way, return false
       return false;
     }
   },
-  updateNote: async (parent, { name,description, time,category, id }, { models, user }) => {
+  updateQuestion: async (parent, { name,description, time,category, id }, { models, user }) => {
     // if not a user, throw an Authentication Error
     if (!user) {
-      throw new AuthenticationError('You must be signed in to update a note');
+      throw new AuthenticationError('You must be signed in to update a question');
     }
 
-    // find the note
-    const note = await models.Note.findById(id);
-    // if the note owner and current user don't match, throw a forbidden error
-    if (note && String(note.author) !== user.id) {
-      throw new ForbiddenError("You don't have permissions to update the note");
+    // find the question
+    const question = await models.Question.findById(id);
+    // if the question owner and current user don't match, throw a forbidden error
+    if (question && String(question.author) !== user.id) {
+      throw new ForbiddenError("You don't have permissions to update the question");
     }
 
-    // Update the note in the db and return the updated note
-    return await models.Note.findOneAndUpdate(
+    // Update the question in the db and return the updated question
+    return await models.Question.findOneAndUpdate(
       {
         _id: id
       },
@@ -85,14 +85,14 @@ module.exports = {
       throw new AuthenticationError();
     }
 
-    // check to see if the user has already favorited the note
-    let noteCheck = await models.Note.findById(id);
-    const hasUser = noteCheck.favoritedBy.indexOf(user.id);
+    // check to see if the user has already favorited the question
+    let questionCheck = await models.Question.findById(id);
+    const hasUser = questionCheck.favoritedBy.indexOf(user.id);
 
     // if the user exists in the list
     // pull them from the list and reduce the favoriteCount by 1
     if (hasUser >= 0) {
-      return await models.Note.findByIdAndUpdate(
+      return await models.Question.findByIdAndUpdate(
         id,
         {
           $pull: {
@@ -110,7 +110,7 @@ module.exports = {
     } else {
       // if the user doesn't exists in the list
       // add them to the list and increment the favoriteCount by 1
-      return await models.Note.findByIdAndUpdate(
+      return await models.Question.findByIdAndUpdate(
         id,
         {
           $push: {

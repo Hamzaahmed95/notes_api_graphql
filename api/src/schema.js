@@ -3,7 +3,7 @@ const { gql } = require('apollo-server-express');
 module.exports = gql`
   scalar DateTime
 
-  type Note {
+  type Question {
     id: ID!
     name: String!
     description:String!
@@ -19,7 +19,7 @@ module.exports = gql`
   type Answer{
     id: ID!
     content: String!
-    question: Note!
+    question: Question!
     isTrue: Boolean!
   }
 
@@ -28,32 +28,32 @@ module.exports = gql`
     username: String!
     email: String!
     avatar: String
-    notes: [Note!]!
-    favorites: [Note!]!
+    questions: [Question!]!
+    favorites: [Question!]!
   }
 
-  type NoteFeed {
-    notes: [Note]!
+  type QuestionFeed {
+    questions: [Question]!
     cursor: String!
     hasNextPage: Boolean!
   }
 
   type Query {
-    notes: [Note!]!
-    note(id: ID): Note!
+    questions: [Question!]!
+    question(id: ID): Question!
     user(username: String!): User
     users: [User!]!
     me: User!
-    noteFeed(cursor: String): NoteFeed
+    questionFeed(cursor: String): QuestionFeed
     answers: [Answer!]!
     answer(id: ID): Answer!
   }
 
   type Mutation {
-    newNote(name: String!, description: String!, time: String!, category: String!): Note
-    updateNote(id: ID!, name: String!, description: String!, time: String!, category: String!): Note!
-    deleteNote(id: ID!): Boolean!
-    toggleFavorite(id: ID!): Note!
+    newQuestion(name: String!, description: String!, time: String!, category: String!): Question
+    updateQuestion(id: ID!, name: String!, description: String!, time: String!, category: String!): Question!
+    deleteQuestion(id: ID!): Boolean!
+    toggleFavorite(id: ID!): Question!
     signUp(username: String!, email: String!, password: String!): String!
     signIn(username: String, email: String, password: String!): String!
     newAnswer(content: String!,questionID: String!,isTrue: Boolean!): Answer

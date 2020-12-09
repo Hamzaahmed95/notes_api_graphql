@@ -1,7 +1,7 @@
 module.exports = {
-    // Resolve the list of notes for a user when requested
+    // Resolve the list of Question for a user when requested
     question: async (answer, args, { models }) => {
-      return await models.Note.findById(answer.question);
+      return await models.Question.findById(answer.question);
     }
 };
   

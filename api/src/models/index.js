@@ -1,9 +1,9 @@
-const Note = require('./note');
+const Question = require('./question');
 const User = require('./user');
 const Answer = require ('./answer');
 
 const models = {
-  Note,
+  Question,
   User,
   Answer
 };

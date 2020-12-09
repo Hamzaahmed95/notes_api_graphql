@@ -1,8 +1,8 @@
 // Require the mongose library
 const mongoose = require('mongoose');
 
-// Define the note's database schema
-const noteSchema = new mongoose.Schema(
+// Define the Question's database schema
+const questionSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -44,7 +44,7 @@ const noteSchema = new mongoose.Schema(
   }
 );
 
-// Define the 'Note' model with the schema
-const Note = mongoose.model('Note', noteSchema);
+// Define the 'Question' model with the schema
+const Question = mongoose.model('Question', questionSchema);
 // Export the module
-module.exports = Note;
+module.exports = Question;
